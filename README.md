@@ -5,7 +5,7 @@ A fully segmented, security-focused homelab designed to emulate enterprise netwo
 ---
 
 ## 📸 Network Diagram
-*(See `/assets/network-diagram.png` in repo)*  
+*(See `HomeLab_Network_map_2.png` in repo)*  
 Diagram includes pfSense, Netgear switch, TP-Link AP, Debian Docker host, Proxmox, and Raspberry Pi nodes.
 
 ---
