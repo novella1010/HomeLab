@@ -1,0 +1,40 @@
+version: '3'
+
+services:
+  synapse:
+    container_name: synapse
+    image: docker.io/matrixdotorg/synapse:latest
+    restart: unless-stopped
+    environment:
+      - SYNAPSE_CONFIG_PATH=/data/homeserver.yaml
+      - UID=1000
+      - GID=1000
+    volumes:
+      - /Matrix-Synapse/synapse:/data
+    depends_on:
+      - synapse-db
+    ports:
+      - 8008:8008   # 👈 ADD THIS to expose to host
+    networks:
+      - custom-bridge
+
+
+  synapse-db:
+    image: postgres:15-alpine
+    container_name: synapse-db
+    restart: unless-stopped
+    environment:
+      - POSTGRES_USER=
+      - POSTGRES_PASSWORD=
+      - POSTGRES_DB=synapse
+      - POSTGRES_INITDB_ARGS=--encoding=UTF-8 --lc-collate=C --lc-ctype=C
+    volumes:
+      - /Matrix-Synapse/synapse-db:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - custom-bridge
+
+networks:
+   custom-bridge:
+    external: true
