@@ -1,124 +1,111 @@
-🏠 Homelab Infrastructure – Overview
+# 🏠 Homelab Infrastructure
 
-This homelab environment is built to simulate an enterprise-grade network with VLAN segmentation, centralized logging, containerized services, reverse proxying, and security monitoring. It is designed for hands-on practice with firewalls, virtualization, monitoring stacks, and Zero-Trust principles.
+A fully segmented, security-focused homelab designed to emulate enterprise networking, virtualization, monitoring, and Zero-Trust principles. This lab includes pfSense firewalling, VLAN routing, Dockerized services, centralized logging, and multi-node monitoring across Debian, Proxmox, and Raspberry Pi hosts.
 
-🔐 Firewall & Edge
-pfSense – 10.0.10.1
+---
 
-The core of the network, acting as the primary router and firewall.
+## 📸 Network Diagram
+*(See `/assets/network-diagram.png` in repo)*  
+Diagram includes pfSense, Netgear switch, TP-Link AP, Debian Docker host, Proxmox, and Raspberry Pi nodes.
 
-Key Features:
+---
 
-VLAN segmentation for internal, AP, Guest, IoT, Lab, and special-purpose networks
+## 🔐 pfSense Firewall – `10.0.10.1`
 
-CrowdSec LAPI for automated intrusion prevention
+The core routing, segmentation, and security enforcement point.
 
-HAProxy / NGINX Proxy Manager SSL Offloading
+### Key Features
+- VLAN segmentation (10, 20, 30, 40, 50, 99, 999)
+- **CrowdSec LAPI** for automated IP banning
+- **Reverse Proxy SSL Offloading** via NGINX Proxy Manager
+- Port forwarding: `443 → NPM`
+- Cloudflare DDNS integration
+- IDS/IPS capabilities (Suricata/Snort)
+- NAT + policy-based routing + firewall rule isolation
 
-Inbound 443 → NPM Proxy
+---
 
-Cloudflare DDNS integration
+## 🖧 Netgear Managed Switch – `10.0.10.2`
 
-Suricata/Snort IDS/IPS (optional)
+Enterprise L2 switching and VLAN distribution.
 
-Full NAT + policy routing
+### Configuration
+- 802.1Q VLANs: `10, 20, 30, 40, 50, 99, 999`
+- Port 1 configured as **trunk uplink to pfSense**
+- All other ports mapped to containers, VMs, AP, and Pi nodes
+- Jumbo frames enabled
+- CrowdSec log parser enabled for switch syslogs
 
-🖧 Switching
-Netgear Managed Switch – 10.0.10.2
+---
 
-Configured as the central layer-2 distribution switch.
+## 📡 TP-Link Access Point – `10.0.10.70`
 
-Highlights:
+Multi-SSID access point mapped to VLANs for wireless segmentation.
 
-802.1Q VLANs: 10, 20, 30, 40, 50, 99, 999
+### SSIDs / VLANs
+- **VLAN 20** – Personal devices (`Todo de Ti`)
+- **VLAN 30** – Guest (`Guest`)
+- **VLAN 40** – IoT  
+  - IoT 5GHz  
+  - IoT 2.4GHz (LORAZAPEM)
 
-Port 1 is the trunk uplink to pfSense
+Ensures isolation between trusted devices, guests, and IoT.
 
-Access ports mapped to Debian, VM hosts, AP, and Raspberry Pi
+---
 
-Jumbo frame support and log parsing agents for CrowdSec
+## 🧰 Debian Docker Host – `10.0.10.22`
 
-📡 Wireless
-TP-Link Access Point – 10.0.10.70
+Main container host running security, monitoring, and proxy services.
 
-Broadcasts multiple segmented SSIDs mapped to VLANs:
+### Dockerized Services
+- **Nginx Proxy Manager**
+- **CrowdSec Reverse Proxy Parser**
+- **Zabbix Agent Monitoring**
+- **NetData Monitoring**
+- **Dozzle Log Viewer**
+- CrowdSec agent for distributed log ingestion
 
-VLAN 20 – Personal devices (e.g., phones, laptops)
+Serves as the hub for reverse proxy entry and monitoring connectivity.
 
-VLAN 30 – Guest network
+---
 
-VLAN 40 – IoT (2.4 GHz + 5 GHz SSIDs)
+## 🖥️ Proxmox Virtualization – `10.0.10.40`
 
-Provides clean isolation for IoT devices, guests, and trusted devices.
+Hypervisor hosting production and testing VMs.
 
-🧰 Core Services & Virtual Machines
-Debian Host – 10.0.10.22
+### Virtual Machines
+- **Mailserver VM** (Mailrise, Apprise) – `10.0.10.105`
+- **Zabbix Server VM** – `10.0.10.102`
+- **Ansible VM**
+- **Kali Linux VM**
+- **CrowdSec Proxmox Log Parser**
+- VLAN-aware bridges for isolated VM networks
 
-Runs Docker and major monitoring components.
+Used for labs, service hosting, and orchestration.
 
-Containers include:
+---
 
-CrowdSec Reverse Proxy Parser
+## 🍓 Raspberry Pi Node – `10.0.50.10`
 
-Zabbix Agent Monitoring
+Automation and lightweight monitoring node running on its own VLAN.
 
-Netdata Monitoring
+### Services
+- **HomeAssistant**
+- **CrowdSec Log Parser / Agent**
+- **Dozzle (Remote Host)**
+- **NetData Agent**
+- **Node Exporter**
 
-Dozzle Log Viewer
+Communicates securely with the Debian host and Proxmox monitoring stack.
 
-Nginx Proxy Manager
+---
 
-Background services for log ingestion and metrics forwarding
+## 🔧 VLAN Segmentation Summary
 
-Proxmox Node – 10.0.10.40
-
-Virtualization node hosting production and lab VMs.
-
-Sample VMs:
-
-mailserver VM (Mailrise, Apprise) – 10.0.10.105
-
-Zabbix Server VM – 10.0.10.102
-
-Kali VM
-
-Ansible VM
-
-Connected via VLAN-aware bridges for isolation and flexibility.
-
-🍓 Raspberry Pi Node – 10.0.50.10
-
-Dedicated lightweight node used for home automation and remote telemetry.
-
-Services:
-
-HomeAssistant
-
-CrowdSec Log Parser / Agent
-
-Dozzle (Remote Host)
-
-NetData Service Agent
-
-Runs on its own subnet (VLAN 50) but communicates securely with the main monitoring stack.
-
-🔧 Network Segmentation Summary
-VLAN	Purpose
-10	Internal trusted devices + servers
-20	Wireless personal devices
-30	Guest WiFi
-40	IoT (cameras, smart plugs, appliances)
-50	Raspberry Pi & automation
-99	Lab WAN for virtual pfSense testing
-999	Management / reserved
-🎯 Project Goals
-
-Build a secure, segmented home network resembling enterprise environments
-
-Practice firewalling, security automation, monitoring, and SIEM ingestion
-
-Self-host critical services with SSL, monitoring, and strict access control
-
-Test new deployments in isolated VLANs and virtualization environments
-
-Gain hands-on experience with threat detection and network observability
+| VLAN | Name / Purpose |
+|------|----------------|
+| **10** | Internal trusted devices & servers |
+| **20** | Wireless personal devices |
+| **30** | Guest WiFi |
+| **40** | IoT devices |
+|
