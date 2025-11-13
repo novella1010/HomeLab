@@ -1,0 +1,29 @@
+version: "3.8"
+
+services:
+  dozzle:
+    image: amir20/dozzle:latest
+    container_name: dozzle
+    environment:
+      - DOZZLE_ENABLE_ACTIONS=true
+      - DOZZLE_ENABLE_SHELL=true
+      - DOZZLE_NO_ANALYTICS=true
+      - DOZZLE_AUTH_PROVIDER=simple
+      - DOZZLE_AUTH_PROVIDER=forward-proxy
+      - DOZZLE_AUTH_HEADER_USER=X-authentik-username
+      - DOZZLE_AUTH_HEADER_EMAIL=X-authentik-email
+      - DOZZLE_AUTH_HEADER_NAME=X-authentik-name
+      #- DOZZLE_REMOTE_AGENT=10.0.50.10:7007, 10.0.10.105:7007
+
+    ports:
+      #- 9099:8080   # You can change this to another nonstandard port below
+    networks:
+      - custom-bridge
+    volumes:
+      #- /var/run/docker.sock:/var/run/docker.sock:ro
+      #- /home/novella/docker/dozzle/data:/data
+    restart: unless-stopped
+
+networks:
+  custom-bridge:
+    external: true
