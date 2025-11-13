@@ -1,0 +1,67 @@
+version: "3.8"
+
+services:
+  mongodb:
+    image: mongo:7.0
+    volumes:
+      - /graylog/mongodb_data:/data/db
+    restart: unless-stopped
+    networks:
+      - custom-bridge
+
+  datanode:
+    image: ${DATANODE_IMAGE:-graylog/graylog-datanode:6.3}
+    hostname: datanode
+    environment:
+      GRAYLOG_DATANODE_NODE_ID_FILE: /var/lib/graylog-datanode/node-id
+      GRAYLOG_DATANODE_PASSWORD_SECRET: 
+      GRAYLOG_DATANODE_ROOT_PASSWORD_SHA2: 
+      GRAYLOG_DATANODE_MONGODB_URI: mongodb://mongodb:27017/graylog
+      GRAYLOG_DATANODE_TLS_DISABLE: "true"
+    ports:
+      - 8999:8999/tcp
+      - 9200:9200/tcp
+      - 9300:9300/tcp
+    networks:
+      - custom-bridge
+    volumes:
+      - graylog/graylog-datanode:/var/lib/graylog-datanode
+    restart: unless-stopped
+
+  graylog:
+    hostname: server
+    image: ${GRAYLOG_IMAGE:-graylog/graylog:6.3}
+    entrypoint: /usr/bin/tini -- /docker-entrypoint.sh
+    environment:
+      TZ: US/Eastern
+      GRAYLOG_ROOT_TIMEZONE: US/Eastern
+      GRAYLOG_NODE_ID_FILE: /usr/share/graylog/data/data/node-id
+      GRAYLOG_PASSWORD_SECRET: 
+      GRAYLOG_ROOT_PASSWORD_SHA2: 
+      GRAYLOG_HTTP_BIND_ADDRESS: 0.0.0.0:9001
+      GRAYLOG_HTTP_EXTERNAL_URI: http://localhost:9001/
+      GRAYLOG_MONGODB_URI: mongodb://mongodb:27017/graylog
+    ports:
+      - 5044:5044/tcp
+      - 5140:5140/udp
+      - 5140:5140/tcp
+      - 5555:5555/tcp
+      - 5555:5555/udp
+      - 5556:5556/tcp
+      - 5556:5556/udp
+      - 19000:9001/tcp
+      - 12201:12201/tcp
+      - 12201:12201/udp
+      - 13301:13301/tcp
+      - 13302:13302/tcp
+    networks:
+      - custom-bridge
+    volumes:
+      - /graylog/graylog_data:/usr/share/graylog/data/data
+      - /docker/graylog/graylog_journal:/usr/share/graylog/data/journal
+      - /docker/graylog/geoipdb:/usr/share/graylog/data/GeoIP
+    restart: unless-stopped
+
+networks:
+  custom-bridge:
+    external: true
