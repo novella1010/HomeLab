@@ -6,7 +6,7 @@ services:
     image: semaphoreui/semaphore:latest
     restart: unless-stopped
     ports:
-      - 8085:3000
+      # - 3000:3000 - Standard Port
     environment:
       SEMAPHORE_DB_DIALECT: sqlite
       SEMAPHORE_ADMIN: 
