@@ -1,0 +1,23 @@
+version: '3'
+services:
+  watchtower:
+    image: containrrr/watchtower
+    container_name: watchtower
+    command:
+      - --cleanup=true
+      - --interval=2592000
+      - --notifications=email
+      - --notification-email-from=
+      - --notification-email-to=
+      - --notification-email-server=
+      - --notification-email-server-port=
+      - --notification-email-subjecttag=[Watchtower Monthly]
+    restart: always
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - /watchtower/logs:/mnt/logs
+    networks:
+      - custom-bridge
+networks:
+  custom-bridge:
+    external: true
