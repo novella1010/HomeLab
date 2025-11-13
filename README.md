@@ -21,6 +21,7 @@ The core routing, segmentation, and security enforcement point.
 - Port forwarding: `443 → NPM`
 - Cloudflare DDNS integration
 - IDS/IPS capabilities (Suricata/Snort)
+- pfBlockerNG with IP list feed downloaded with active blocking.
 - NAT + policy-based routing + firewall rule isolation
 
 ---
@@ -33,7 +34,7 @@ Enterprise L2 switching and VLAN distribution.
 - 802.1Q VLANs: `10, 20, 30, 40, 50, 99, 999`
 - Port 1 configured as **trunk uplink to pfSense**
 - All other ports mapped to containers, VMs, AP, and Pi nodes
-- Jumbo frames enabled
+- IGMP Snooping Enabled on Trunk Port 1
 - CrowdSec log parser enabled for switch syslogs
 
 ---
@@ -76,8 +77,8 @@ Hypervisor hosting production and testing VMs.
 ### Virtual Machines
 - **Mailserver VM** (Mailrise, Apprise) – `10.0.10.105`
 - **Zabbix Server VM** – `10.0.10.102`
-- **Ansible VM**
-- **Kali Linux VM**
+- **Ansible VM** - `10.0.10.101`
+- **Kali Linux VM** - `10.96.12.10`
 - **CrowdSec Proxmox Log Parser**
 - VLAN-aware bridges for isolated VM networks
 
