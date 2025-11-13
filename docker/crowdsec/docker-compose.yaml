@@ -1,0 +1,24 @@
+  services:
+   crowdsec:
+    image: docker.io/crowdsecurity/crowdsec:latest
+    container_name: crowdsec
+    environment:
+      - COLLECTIONS=crowdsecurity/nginx-proxy-manager 
+      #- DISABLE_LOCAL_API=true
+      #- AGENT_USERNAME=
+      #- AGENT_PASSWORD=
+      #- LOCAL_API_URL=
+    volumes:
+      #- /docker/crowdsec/crowdsec-db:/var/lib/crowdsec/data/
+      #- /docker/crowdsec/crowdsec-config:/etc/crowdsec/
+      #- /crowdsec/acquis.yaml:/etc/crowdsec/acquis.yaml
+      #- /nginx/data/logs:/var/log/nginx:ro
+    ports:
+      # - 6060:6060 - exposed for prometheus data
+    restart: unless-stopped
+    networks:
+      custom-bridge:
+
+  networks:
+    custom-bridge:
+     external: true
