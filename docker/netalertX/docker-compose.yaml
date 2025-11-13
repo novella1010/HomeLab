@@ -1,0 +1,15 @@
+services:
+  netalertx:
+    container_name: netalertx
+    image: "ghcr.io/jokob-sk/netalertx:latest"
+    network_mode: "host"
+    restart: unless-stopped
+    volumes:
+      - ./config:/app/config
+      - ./db:/app/db
+      - ./logs:/app/log
+      - type: tmpfs
+        target: /app/api
+    environment:
+      - TZ=America/New_York
+      - PORT=20211
