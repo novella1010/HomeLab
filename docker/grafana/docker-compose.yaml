@@ -1,0 +1,113 @@
+version: "3.8"
+
+services:
+  grafana:
+    image: grafana/grafana:latest
+    container_name: grafana
+    restart: unless-stopped
+    ports:
+      - "3000:3000"
+    volumes:
+      - /home/novella/docker/grafana/grafana-storage:/var/lib/grafana
+    environment:
+      - GF_SECURITY_ADMIN_USER=
+      - GF_SECURITY_ADMIN_PASSWORD=
+    depends_on:
+      - prometheus
+    networks:
+      - custom-bridge
+
+  prometheus:
+    image: prom/prometheus:latest
+    user: root
+    container_name: prometheus
+    restart: unless-stopped
+    ports:
+      - "9090:9090"
+    volumes:
+      - /grafana/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./prometheus_data:/prometheus
+    networks:
+      - custom-bridge
+
+  node_exporter:
+    image: quay.io/prometheus/node-exporter:latest
+    container_name: node_exporter
+    restart: unless-stopped
+    network_mode: "host"      # gives access to host metrics
+    pid: "host"
+    volumes:
+      - "/:/host:ro,rslave"
+    command:
+      - '--path.rootfs=/host'
+
+  cadvisor:
+    image: gcr.io/cadvisor/cadvisor:latest
+    container_name: cadvisor
+    restart: unless-stopped
+    ports:
+    - 9095:8080
+    volumes:
+    - /:/rootfs:ro
+    - /var/run:/var/run:rw
+    - /var/run/docker.sock:/var/run/docker.sock:ro
+    - /sys:/sys:ro
+    - /var/lib/docker/:/var/lib/docker:ro
+    networks:
+      - custom-bridge
+
+  pve_exporter:
+    image: prompve/prometheus-pve-exporter:latest
+    container_name: pve_exporter
+    restart: unless-stopped
+    ports:
+      - "9221:9221"
+    environment:
+      - PVE_USER=
+      - PVE_TOKEN_NAME=
+      - PVE_TOKEN_VALUE=
+      - PVE_VERIFY_SSL=
+      - PVE_URL=
+    networks:
+      - custom-bridge
+
+  snmp_exporter:
+    image: prom/snmp-exporter:latest
+    container_name: snmp_exporter
+    restart: unless-stopped
+    ports:
+      - "9116:9116"
+      - "161:161/udp"
+    volumes:
+      - /grafana/exporters/snmp.yml:/etc/snmp_exporter/snmp.yml
+    networks:
+      - custom-bridge
+
+  influxdb:
+    image: "influxdb:1.8.3-alpine"
+    container_name: influxdb
+    hostname: influxdb
+    restart: unless-stopped
+    ports:
+      - "8087:8086"
+    volumes:
+      - /grafana/influxdb/data:/var/lib/influxdb2
+    environment:
+      TZ: "America/New_York"
+      INFLUXDB_DATA_QUERY_LOG_ENABLED: false
+      INFLUXDB_REPORTING_DISABLED: true
+      INFLUXDB_HTTP_AUTH_ENABLED: true
+      INFLUXDB_ADMIN_USER: 
+      INFLUXDB_ADMIN_PASSWORD: 
+      INFLUXDB_USER: 
+      INFLUXDB_USER_PASSWORD: 
+      INFLUXDB_DB: 
+    networks:
+      - custom-bridge
+
+volumes:
+  prometheus_data:
+
+networks:
+  custom-bridge:
+    external: true
