@@ -1,0 +1,25 @@
+version: "2.1"
+
+services:
+  pairdrop:
+    image: lscr.io/linuxserver/pairdrop:latest
+    container_name: pairdrop
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York     # updated to your timezone
+      - RATE_LIMIT=true        # optional
+      - WS_FALLBACK=true       # optional
+      - RTC_CONFIG=             # optional
+      - DEBUG_MODE=true        # optional
+    ports:
+      - "8090:3000"             # changed from 3000:3000 to 8090:3000 to avoid conflicts
+    networks:
+      - custom-bridge              # attach to your existing Docker network
+    restart: unless-stopped
+    volumes:
+      - /pairdrop/config:/config        # optional (for logs/config persistence)
+
+networks:
+  custom-bridge:
+    external: true
